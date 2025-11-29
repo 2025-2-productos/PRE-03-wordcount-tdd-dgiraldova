@@ -1,7 +1,6 @@
 # Ejemplo para casos de uso
 # python3 -m homework data/input data/output
 import argparse
-import sys
 
 from ._internals.read_all_lines import read_all_lines
 
