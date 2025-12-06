@@ -1,7 +1,13 @@
+import os
+import shutil
 import sys
 
-from ...wordcount import parse_args, preprocess_lines
+from ...wordcount import parse_args
+from ..count_words import count_words
+from ..preprocess_lines import preprocess_lines
 from ..read_all_lines import read_all_lines
+from ..split_into_words import split_into_words
+from ..write_word_counts import write_word_counts
 
 
 def test_parse_args():
@@ -29,6 +35,46 @@ def test_read_all_lines():
 
 
 def test_preprocess_lines():
-    lines = [" Hello, World!  ", "This is a Test."]
+    lines = [" Hello, World!  ", "This is a TEST."]
     preprocessed_lines = preprocess_lines(lines)
-    assert preprocessed_lines == ["hello world", "this is a test"]
+    assert preprocessed_lines == ["hello, world!", "this is a test."]
+
+
+def test_split_into_words():
+    lines = ["hello, world!", "this is a test."]
+    words = split_into_words(lines)
+    assert words == ["hello", "world", "this", "is", "a", "test"]
+
+
+def test_count_words():
+    words = ["hello", "world", "this", "is", "a", "test"]
+    word_counts = count_words(words)
+    assert word_counts == {
+        "hello": 1,
+        "world": 1,
+        "this": 1,
+        "is": 1,
+        "a": 1,
+        "test": 1,
+    }
+
+
+def test_write_word_counts():
+    output_folder = "data/output/"
+    word_counts = {"hello": 2, "world": 1, "python": 1}
+
+    if os.path.exists(output_folder):
+        shutil.rmtree(output_folder)
+
+    write_word_counts(output_folder, word_counts)
+
+    output_file = os.path.join(output_folder, "wordcount.tsv")
+    assert os.path.exists(output_file), "Output file was not created"
+
+    with open(output_file, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    assert lines == ["hello\t2\n", "world\t1\n", "python\t1\n"]
+
+    # Clean up
+    shutil.rmtree(output_folder)
